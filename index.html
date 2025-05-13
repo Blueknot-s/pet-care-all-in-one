@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>우리댕냥이들 건강관리 툴</title>
   <style>
     * { box-sizing: border-box; }
@@ -93,12 +93,99 @@
     <h3>예방접종 안내</h3>
     <button onclick="showVaccinationSchedule()">기본 접종 스케줄 확인</button>
     <div class="result" id="vaccResult"></div>
+    <button onclick="copyVaccSchedule()">📋 복사하기</button>
+    <button onclick="shareVaccSchedule()">🔗 공유하기</button>
   </div>
 
-  <!-- JS 삽입 -->
   <script>
-    // 전체 스크립트는 현재 Canvas에 있는 코드 그대로 사용됩니다.
-    // (내용 생략 – 이미 최신 상태로 반영됨)
+    const pets = [];
+    function addPet() {
+      const name = document.getElementById('petName').value;
+      const birth = document.getElementById('petBirth').value;
+      const type = document.getElementById('petType').value;
+      if (!name || !birth) return alert('모든 항목을 입력해주세요.');
+      pets.push({ name, birth, type });
+      document.getElementById('petList').innerHTML = pets.map(p => `<button>${p.name}</button>`).join('');
+      alert(`${name} 등록 완료!`);
+    }
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelector(`.tabs button[onclick*='${id}']`)?.classList.add('active');
+    }
+    function calcFood() {
+      const weight = parseFloat(document.getElementById('weight').value);
+      const kcal = parseFloat(document.getElementById('calorie').value);
+      const activity = document.getElementById('activity').value;
+      const age = document.getElementById('ageGroup').value;
+      const unit = document.getElementById('unit').value;
+      const totalFoodKg = parseFloat(document.getElementById('totalFood').value);
+      const petCount = parseInt(document.getElementById('petCount').value);
+      let base = 100;
+      if (age === 'young') base *= 1.2;
+      if (age === 'senior') base *= 0.9;
+      if (activity === 'low') base *= 0.8;
+      if (activity === 'high') base *= 1.2;
+      const daily = weight * base;
+      const grams = (daily / kcal) * 100;
+      const cups = grams / 100;
+      const totalGrams = totalFoodKg * 1000;
+      const dailyTotalGrams = grams * petCount;
+      const duration = Math.floor(totalGrams / dailyTotalGrams);
+      const display = unit === 'cup'
+        ? `하루 필요 사료량: 약 ${cups.toFixed(2)}컵\n총 ${petCount}마리 기준 소비: ${(cups * petCount).toFixed(2)}컵\n보유 사료 소요 기간: 약 ${duration}일`
+        : `하루 필요 사료량: 약 ${grams.toFixed(1)}g\n총 ${petCount}마리 기준 소비: ${(grams * petCount).toFixed(1)}g\n보유 사료 소요 기간: 약 ${duration}일`;
+      document.getElementById('foodResult').innerText = display;
+    }
+    function calcAge() {
+      if (pets.length === 0) return alert('댕냥이를 먼저 등록해주세요.');
+      const birth = new Date(pets[0].birth);
+      const today = new Date();
+      const months = (today.getFullYear() - birth.getFullYear()) * 12 + today.getMonth() - birth.getMonth();
+      const type = pets[0].type;
+      let humanAge = months <= 24 ? months * 0.75 : 15 + (months - 24) * (type === 'dog' ? 0.5 : 0.6);
+      document.getElementById('ageResult').innerText = `댕냥이 나이: ${months}개월 / 사람 나이 환산: 약 ${Math.round(humanAge)}세`;
+    }
+    function showVaccinationSchedule() {
+      if (pets.length === 0) {
+        document.getElementById('vaccResult').innerHTML = '먼저 댕냥이를 등록해주세요.';
+        return;
+      }
+      const type = pets[0].type;
+      let html = '<strong>기본 예방접종 스케줄:</strong><br>';
+      if (type === 'dog') {
+        html += '생후 6~8주: 종합백신 1차 (DHPPL), 코로나 (선택), 켄넬코프<br>';
+        html += '생후 8~10주: 종합백신 2차, 코로나 2차 (선택)<br>';
+        html += '생후 10~12주: 종합백신 3차, 광견병 1차<br>';
+        html += '1년 이상: 종합 + 광견병 매년 1회<br>';
+      } else {
+        html += '생후 6~8주: 종합백신 1차 (FVRCP)<br>';
+        html += '생후 8~10주: 종합백신 2차<br>';
+        html += '생후 10~12주: 종합백신 3차, 광견병 1차<br>';
+        html += '1년 이상: 종합 + 광견병 매년 1회<br>';
+      }
+      html += '<p style="font-size:0.9em; color:#555; margin-top:10px;">※ 코로나 백신은 Canine Coronavirus(CCoV)에 대한 백신으로, 필수는 아니며 수의사의 판단에 따라 선택적으로 접종합니다.<br>※ 출처: WSAVA, AVMA, 대한수의사회</p>';
+      document.getElementById('vaccResult').innerHTML = html;
+    }
+    function copyVaccSchedule() {
+      const el = document.createElement('textarea');
+      el.value = document.getElementById('vaccResult').innerText;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      alert('예방접종 스케줄이 복사되었습니다!');
+    }
+    function shareVaccSchedule() {
+      const text = document.getElementById('vaccResult').innerText;
+      if (navigator.share) {
+        navigator.share({ title: '우리댕냥이 예방접종', text });
+      } else {
+        alert('공유 기능은 모바일 브라우저 또는 일부 브라우저에서만 지원됩니다.');
+      }
+    }
+    showSection('food');
   </script>
 </body>
 </html>
