@@ -81,20 +81,24 @@
     <label>마리 수:</label><input type="number" id="petCount" value="1">
     <button onclick="calcFood()">계산하기</button>
     <div class="result" id="foodResult"></div>
+    <button onclick="copyTextFromElement('foodResult')">📋 복사하기</button>
+    <button onclick="shareTextFromElement('foodResult', '우리댕냥이 사료 계산 결과')">🔗 공유하기</button>
   </div>
 
   <div id="age" class="section">
     <h3>나이 계산기</h3>
     <button onclick="calcAge()">나이 계산</button>
     <div class="result" id="ageResult"></div>
+    <button onclick="copyTextFromElement('ageResult')">📋 복사하기</button>
+    <button onclick="shareTextFromElement('ageResult', '우리댕냥이 나이 계산 결과')">🔗 공유하기</button>
   </div>
 
   <div id="vacc" class="section">
     <h3>예방접종 안내</h3>
     <button onclick="showVaccinationSchedule()">기본 접종 스케줄 확인</button>
     <div class="result" id="vaccResult"></div>
-    <button onclick="copyVaccSchedule()">📋 복사하기</button>
-    <button onclick="shareVaccSchedule()">🔗 공유하기</button>
+    <button onclick="copyTextFromElement('vaccResult')">📋 복사하기</button>
+    <button onclick="shareTextFromElement('vaccResult', '우리댕냥이 예방접종 스케줄')">🔗 공유하기</button>
   </div>
 
   <script>
@@ -168,19 +172,19 @@
       html += '<p style="font-size:0.9em; color:#555; margin-top:10px;">※ 코로나 백신은 Canine Coronavirus(CCoV)에 대한 백신으로, 필수는 아니며 수의사의 판단에 따라 선택적으로 접종합니다.<br>※ 출처: WSAVA, AVMA, 대한수의사회</p>';
       document.getElementById('vaccResult').innerHTML = html;
     }
-    function copyVaccSchedule() {
+    function copyTextFromElement(id) {
       const el = document.createElement('textarea');
-      el.value = document.getElementById('vaccResult').innerText;
+      el.value = document.getElementById(id).innerText;
       document.body.appendChild(el);
       el.select();
       document.execCommand('copy');
       document.body.removeChild(el);
-      alert('예방접종 스케줄이 복사되었습니다!');
+      alert('복사되었습니다!');
     }
-    function shareVaccSchedule() {
-      const text = document.getElementById('vaccResult').innerText;
+    function shareTextFromElement(id, title) {
+      const text = document.getElementById(id).innerText;
       if (navigator.share) {
-        navigator.share({ title: '우리댕냥이 예방접종', text });
+        navigator.share({ title, text });
       } else {
         alert('공유 기능은 모바일 브라우저 또는 일부 브라우저에서만 지원됩니다.');
       }
