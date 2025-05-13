@@ -1,112 +1,4 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>우리댕냥이들 건강관리 툴</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; padding: 20px; margin: auto; max-width: 720px; }
-    h2, h3 { text-align: center; margin-bottom: 10px; }
-    .tabs { display: flex; flex-wrap: wrap; justify-content: space-between; margin-bottom: 20px; }
-    .tabs button {
-      flex: 1 1 48%;
-      margin: 5px 0;
-      padding: 10px;
-      font-size: 16px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .tabs button.active { background-color: #0056b3; }
-    label { display: block; margin-top: 10px; font-weight: bold; }
-    input, select, button {
-      width: 100%; padding: 8px; margin-top: 5px; font-size: 16px; border-radius: 4px; border: 1px solid #ccc; }
-    .section { display: none; margin-top: 20px; }
-    .section.active { display: block; }
-    .note, .result {
-      margin-top: 15px; padding: 10px; background: #f9f9f9; border-left: 4px solid #007bff;
-      white-space: pre-line;
-    }
-    .profile-list button { margin: 5px 5px 0 0; }
-  </style>
-</head>
-<body>
-  <h2>우리댕냥이들 건강관리 툴</h2>
-
-  <div>
-    <h3>우리 댕냥이 등록하기</h3>
-    <label>이름:</label>
-    <input type="text" id="petName">
-    <label>생일:</label>
-    <input type="date" id="petBirth">
-    <label>종류:</label>
-    <select id="petType">
-      <option value="dog">댕이 (강아지)</option>
-      <option value="cat">냥이 (고양이)</option>
-    </select>
-    <button onclick="addPet()">댕냥이 등록</button>
-    <div class="note profile-list" id="petList"></div>
-  </div>
-
-  <div class="tabs">
-    <button onclick="showSection('food')">사료 계산기</button>
-    <button onclick="showSection('age')">나이 계산기</button>
-    <button onclick="showSection('vacc')">예방접종</button>
-    <button onclick="showSection('weight')">체중 & 간식</button>
-  </div>
-
-  <div id="food" class="section">
-    <h3>사료 계산기</h3>
-    <label>체중 (kg):</label>
-    <input type="number" id="weight">
-    <label>사료 100g당 칼로리 (kcal):</label>
-    <input type="number" id="calorie">
-    <label>활동량:</label>
-    <select id="activity">
-      <option value="low">저활동</option>
-      <option value="normal" selected>보통</option>
-      <option value="high">고활동</option>
-    </select>
-    <label>연령대:</label>
-    <select id="ageGroup">
-      <option value="young">어린</option>
-      <option value="adult" selected>성견/성묘</option>
-      <option value="senior">노령</option>
-    </select>
-    <button onclick="calcFood()">계산하기</button>
-    <div class="result" id="foodResult"></div>
-  </div>
-
-  <div id="age" class="section">
-    <h3>나이 계산기</h3>
-    <button onclick="calcAge()">나이 계산</button>
-    <div class="result" id="ageResult"></div>
-  </div>
-
-  <div id="vacc" class="section">
-    <h3>예방접종</h3>
-    <button onclick="showVaccinationSchedule()">기본 접종 스케줄</button>
-    <div class="result" id="vaccResult"></div>
-  </div>
-
-  <div id="weight" class="section">
-    <h3>체중 & 간식 체크</h3>
-    <label>현재 체중 (kg):</label>
-    <input type="number" id="currentWeight">
-    <label>적정 체중 (kg):</label>
-    <input type="number" id="idealWeight">
-    <label>하루 간식 칼로리 (kcal):</label>
-    <input type="number" id="snack">
-    <label>총 권장 칼로리 (kcal):</label>
-    <input type="number" id="daily">
-    <button onclick="checkSnack()">확인</button>
-    <div class="result" id="weightResult"></div>
-  </div>
-
-  <script>
+<script>
     const pets = [];
     function addPet() {
       const name = document.getElementById('petName').value;
@@ -119,14 +11,19 @@
     }
     function showSection(id) {
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
       document.getElementById(id).classList.add('active');
+      const buttons = document.querySelectorAll('.tabs button');
+      buttons.forEach(btn => {
+        if (btn.getAttribute('onclick')?.includes(id)) btn.classList.add('active');
+      });
     }
     function calcFood() {
       const weight = parseFloat(document.getElementById('weight').value);
       const kcal = parseFloat(document.getElementById('calorie').value);
       const activity = document.getElementById('activity').value;
       const age = document.getElementById('ageGroup').value;
-      let base = 100; // 기본 kcal/kg
+      let base = 100;
       if (age === 'young') base *= 1.2;
       if (age === 'senior') base *= 0.9;
       if (activity === 'low') base *= 0.8;
@@ -158,15 +55,17 @@
       const ideal = parseFloat(document.getElementById('idealWeight').value);
       const snack = parseFloat(document.getElementById('snack').value);
       const daily = parseFloat(document.getElementById('daily').value);
-      if (!current || !ideal || !snack || !daily) return alert('모든 값을 입력해주세요.');
+      const resultBox = document.getElementById('weightResult');
+      if (!current || !ideal || !snack || !daily || isNaN(current) || isNaN(ideal) || isNaN(snack) || isNaN(daily)) {
+        resultBox.innerText = '모든 값을 정확히 입력해주세요.';
+        return;
+      }
       let result = `간식 비율: ${(snack / daily * 100).toFixed(1)}%\n`;
       if (snack / daily > 0.1) result += '⚠️ 간식 비율이 높습니다.\n';
       if (current > ideal + 1) result += '⚠️ 과체중일 수 있어요.\n';
       else if (current < ideal - 1) result += '⚠️ 저체중일 수 있어요.\n';
       else result += '✅ 적정 체중입니다.\n';
-      document.getElementById('weightResult').innerText = result;
+      resultBox.innerText = result;
     }
     showSection('food');
   </script>
-</body>
-</html>
