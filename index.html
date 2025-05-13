@@ -39,7 +39,7 @@
 <body>
   <h2>우리댕냥이들 건강관리 툴</h2>
 
-  <!-- 아이 등록 -->
+  <!-- 등록 영역 -->
   <div>
     <h3>우리 댕냥이 등록하기</h3>
     <label>이름:</label><input type="text" id="petName">
@@ -55,19 +55,33 @@
 
   <!-- 탭 메뉴 -->
   <div class="tabs">
-    <button onclick="showSection('food')" class="active">사료 계산기</button>
+    <button onclick="showSection('food')">사료 계산기</button>
     <button onclick="showSection('age')">나이 계산기</button>
     <button onclick="showSection('vaccination')">예방접종</button>
     <button onclick="showSection('weight')">체중 & 간식</button>
   </div>
 
-  <!-- 각 섹션은 코드에 구현되어 있음 -->
-  <!-- food, age, vaccination, weight 각 섹션 + script는 이전 코드에서 이미 반영된 상태이므로 그대로 유지 -->
+  <!-- 섹션 영역은 JS에서 동적으로 삽입하거나 이후에 직접 삽입 필요 -->
+  <div id="contentArea"></div>
 
-  <!-- JS 로직 -->
   <script>
-    // 이전 단계에서 반영한 전체 스크립트 코드가 여기에 위치
-    // (이미 canvas에 저장된 코드 그대로 사용 가능)
+    const contentMap = {
+      food: `<h3>사료 계산기</h3><p>여기에 사료 계산기 내용이 들어갑니다.</p>`,
+      age: `<h3>나이 계산기</h3><p>여기에 나이 계산기 내용이 들어갑니다.</p>`,
+      vaccination: `<h3>예방접종</h3><p>여기에 예방접종 기능이 들어갑니다.</p>`,
+      weight: `<h3>체중 & 간식</h3><p>여기에 체중 및 간식 관련 기능이 들어갑니다.</p>`
+    };
+
+    function showSection(section) {
+      const buttons = document.querySelectorAll('.tabs button');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      const targetBtn = [...buttons].find(btn => btn.textContent.includes(section === 'food' ? '사료' : section === 'age' ? '나이' : section === 'vaccination' ? '예방접종' : '간식'));
+      if (targetBtn) targetBtn.classList.add('active');
+      document.getElementById('contentArea').innerHTML = contentMap[section] || '';
+    }
+
+    // 기본 탭 보여주기
+    window.onload = () => showSection('food');
   </script>
 </body>
 </html>
