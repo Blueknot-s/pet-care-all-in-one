@@ -28,6 +28,7 @@
     .section.active { display: block; }
     .note, .result {
       margin-top: 15px; padding: 10px; background: #f9f9f9; border-left: 4px solid #007bff;
+      white-space: pre-line;
     }
     .profile-list button { margin: 5px 5px 0 0; }
   </style>
@@ -157,7 +158,8 @@
       const ideal = parseFloat(document.getElementById('idealWeight').value);
       const snack = parseFloat(document.getElementById('snack').value);
       const daily = parseFloat(document.getElementById('daily').value);
-      let result = '';
+      if (!current || !ideal || !snack || !daily) return alert('모든 값을 입력해주세요.');
+      let result = `간식 비율: ${(snack / daily * 100).toFixed(1)}%\n`;
       if (snack / daily > 0.1) result += '⚠️ 간식 비율이 높습니다.\n';
       if (current > ideal + 1) result += '⚠️ 과체중일 수 있어요.\n';
       else if (current < ideal - 1) result += '⚠️ 저체중일 수 있어요.\n';
